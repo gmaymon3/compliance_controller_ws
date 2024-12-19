@@ -60,8 +60,6 @@ public:
 private:
     void tf_callback(const tf2_msgs::msg::TFMessage::SharedPtr msg) const {
       RCLCPP_INFO(this->get_logger(), "Received %lu transforms from /tf", msg->transforms.size());
-      std::array<std::array<std::array<double, 4>, 4>, 9> transMatrices; 
-      //std::array<std::array<double, 4>, 4> endMatrix;
       std::array<std::array<double, 4>, 4> endMatrix = {{
         {1.0, 0.0, 0.0, 0.0},
         {0.0, 1.0, 0.0, 0.0},
@@ -72,7 +70,6 @@ private:
       for (const auto &transform : msg->transforms) {
         // Create a new Float32 message to publish translation data
         auto float_msg = std_msgs::msg::Float32MultiArray();
-
 
         // You can choose to publish the translation as a single float (e.g., x, y, or z)
         // For example, let's publish the x translation
@@ -90,17 +87,16 @@ private:
 
         // Compute the rotation matrix
         quaternionToTransformationMatrix(x, y, z, w,t_x,t_y,t_z, transMatrix);
+        
         i++; 
-        transMatrices[i] = transMatrix; 
-
         if (i > 1){
-            endMatrix = multiply_matrices(endMatrix,transMatrices[i]);
+            endMatrix = multiply_matrices(endMatrix,transMatrix);
             //endMatrix = transMatrices[1];
         }
         // RCLCPP_INFO(this->get_logger(), "  Frame ID: %s", transform.header.frame_id.c_str());
         // RCLCPP_INFO(this->get_logger(), "  Child Frame ID: %s", transform.child_frame_id.c_str());
         // Output the rotation matrix
-        // std::cout << "Rotation Matrix:\n";
+        // std::cout << "Trans Matrix:\n";
         // for (const auto &row : transMatrix) {
         //     for (const auto &elem : row) {
         //         std::cout << elem << " ";
@@ -113,7 +109,7 @@ private:
         publisher_->publish(float_msg);
       }
 
-      std::cout << "End Matrix:\n";
+      std::cout << "End Effector Matrix:\n";
       for (const auto &row : endMatrix) {
         for (const auto &elem : row) {
             std::cout << elem << " ";
