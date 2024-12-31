@@ -1,6 +1,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_msgs/msg/tf_message.hpp"
-//#include "cart_pos/msg/CartPosVector.hpp" // Custom message
+#include "cart_pos/msg/cartposvector.hpp" // Custom message
 #include "std_msgs/msg/float32_multi_array.hpp"  // Import the standard Float32 message
 #include <array>
 
@@ -50,7 +50,7 @@ public:
         );
 
         // Publisher for the translation-only vector
-        publisher_ = this->create_publisher<std_msgs::msg::Float32MultiArray>(
+        publisher_ = this->create_publisher<cart_pos::msg::Cartposvector>(
             "/cart_pos", 10
         );
 
@@ -69,7 +69,7 @@ private:
       int i = 0; 
       for (const auto &transform : msg->transforms) {
         // Create a new Float32 message to publish translation data
-        auto float_msg = std_msgs::msg::Float32MultiArray();
+        auto message = cart_pos::msg::Cartposvector();
 
         // You can choose to publish the translation as a single float (e.g., x, y, or z)
         // For example, let's publish the x translation
@@ -104,9 +104,15 @@ private:
         //     std::cout << "\n";
         // }
 
-        float_msg.data = {1,1,1};
+        //float_msg.data = {1,1,1};
+        message.x = endMatrix[0][3]; 
+        message.y = endMatrix[1][3]; 
+        message.z = endMatrix[2][3]; 
+        // message.x = 1; 
+        // message.y = 2; 
+        // message.z = 3; 
         // Publish the translation data (x value in this case)
-        publisher_->publish(float_msg);
+        publisher_->publish(message);
       }
 
       std::cout << "End Effector Matrix:\n";
@@ -121,7 +127,7 @@ private:
     }
 
     rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr subscription_;
-    rclcpp::Publisher<std_msgs::msg::Float32MultiArray>::SharedPtr publisher_;
+    rclcpp::Publisher<cart_pos::msg::Cartposvector>::SharedPtr publisher_;
 };
 
 int main(int argc, char *argv[]) {

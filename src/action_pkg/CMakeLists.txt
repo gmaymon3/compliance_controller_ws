@@ -14,6 +14,7 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/Reach.action"
+  DEPENDENCIES builtin_interfaces
 )
 
 add_executable(reach_node src/reach_node.cpp)
@@ -26,11 +27,19 @@ ament_target_dependencies(
   rclcpp
   rclcpp_action
   "moveit_ros_planning_interface"
-  "rclcpp"
+)
+
+# Link the generated interfaces to the executable
+rosidl_target_interfaces(reach_node
+  ${PROJECT_NAME} "rosidl_typesupport_cpp"
 )
 
 install(TARGETS reach_node
   DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY action
+  DESTINATION share/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
