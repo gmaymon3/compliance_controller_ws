@@ -115,13 +115,13 @@ private:
         publisher_->publish(message);
       }
 
-      std::cout << "End Effector Matrix:\n";
-      for (const auto &row : endMatrix) {
-        for (const auto &elem : row) {
-            std::cout << elem << " ";
-        }
-        std::cout << "\n";
-      }
+    //   std::cout << "End Effector Matrix:\n";
+    //   for (const auto &row : endMatrix) {
+    //     for (const auto &elem : row) {
+    //         std::cout << elem << " ";
+    //     }
+    //     std::cout << "\n";
+    //   }
       
 
     }
