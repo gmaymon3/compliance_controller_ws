@@ -1,0 +1,6 @@
+float32 goal_position
+---
+float32 actual_position
+string status
+---
+bool success
