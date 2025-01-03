@@ -1,1 +1,0 @@
-float64[3] translation  # x, y, z

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(cart_pos)
+project(action_pkg)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -9,43 +9,36 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-find_package(std_msgs REQUIRED)  # Add std_msgs dependency for Float32
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/Cartposvector.msg"
+  "action/Reach.action"
   DEPENDENCIES builtin_interfaces
 )
 
-add_executable(cart_pos_node src/cart_pos.cpp)
-target_include_directories(cart_pos_node PUBLIC
+add_executable(reach_node src/reach_node.cpp)
+target_include_directories(reach_node PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-target_compile_features(cart_pos_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+target_compile_features(reach_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 ament_target_dependencies(
-  cart_pos_node
-  moveit_ros_planning_interface
+  reach_node
   rclcpp
-  tf2
-  tf2_msgs
-  std_msgs  # Added std_msgs for Float32 message
+  rclcpp_action
+  "moveit_ros_planning_interface"
 )
 
-# Link generated interfaces
-#rosidl_target_interfaces(cart_pos_node
-#  ${PROJECT_NAME} "rosidl_typesupport_cpp"
-#)
+# Link the generated interfaces to the executable
+rosidl_target_interfaces(reach_node
+  ${PROJECT_NAME} "rosidl_typesupport_cpp"
+)
 
-# Get the typesupport target and link it manually
-rosidl_get_typesupport_target(typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
-target_link_libraries(cart_pos_node ${typesupport_target})
-
-install(TARGETS cart_pos_node
+install(TARGETS reach_node
   DESTINATION lib/${PROJECT_NAME})
 
-# Install the msg files
-install(DIRECTORY msg
-  DESTINATION share/${PROJECT_NAME}/
+install(DIRECTORY action
+  DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
