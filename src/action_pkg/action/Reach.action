@@ -1,6 +1,7 @@
-float32 goal_position
+float32 goal_position_x
+float32 goal_position_y
+float32 goal_position_z
 ---
-float32 actual_position
 string status
 ---
 bool success

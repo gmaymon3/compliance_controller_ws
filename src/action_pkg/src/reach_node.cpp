@@ -38,7 +38,7 @@ private:
     rclcpp_action::GoalResponse handle_goal(
         const rclcpp_action::GoalUUID & uuid,
         std::shared_ptr<const Reach::Goal> goal) {
-        RCLCPP_INFO(this->get_logger(), "Received goal request for position %f", goal->goal_position);
+        RCLCPP_INFO(this->get_logger(), "Received goal request for position x %f, y %f, z %f", goal->goal_position_x,goal->goal_position_y,goal->goal_position_z);
         (void)uuid;
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }
@@ -59,44 +59,44 @@ private:
 
         const auto goal = goal_handle->get_goal();
 
-        // Define target pose
+        // Get current pose of the end effector (PoseStamped)
+        geometry_msgs::msg::PoseStamped current_pose_stamped = move_group_->getCurrentPose();
+
+        // Extract the Pose from PoseStamped
+        geometry_msgs::msg::Pose current_pose = current_pose_stamped.pose;
+
+
+        // Print the Cartesian position of the end effector
+        RCLCPP_INFO(this->get_logger(), "End effector position: [x: %f, y: %f, z: %f]",
+                    current_pose.position.x, current_pose.position.y, current_pose.position.z);
+        RCLCPP_INFO(this->get_logger(), "End effector orientation: [x: %f, y: %f, z: %f, w: %f]",
+                    current_pose.orientation.x, current_pose.orientation.y, current_pose.orientation.z, current_pose.orientation.w);        // Define target pose
+        
         geometry_msgs::msg::Pose target_pose;
-        target_pose.position.x = goal->goal_position; // X position from goal
-        target_pose.position.y = 0.0;                // Example Y position
-        target_pose.position.z = 0.7;                // Example Z position
-        target_pose.orientation.w = 1.0;             // Example orientation
+        target_pose.position.x = goal->goal_position_x; // X position from goal
+        target_pose.position.y = goal->goal_position_y;                // Example Y position
+        target_pose.position.z = goal->goal_position_z;                // Example Z position
+        target_pose.orientation.x = current_pose.orientation.x;             // Example orientation
+        target_pose.orientation.y = current_pose.orientation.y;             // Example orientation
+        target_pose.orientation.z = current_pose.orientation.z;             // Example orientation
+        target_pose.orientation.w = current_pose.orientation.w;             // Example orientation
 
         // Set the target pose in MoveGroupInterface
         move_group_->setPoseTarget(target_pose);
                 
         auto moveit_result = move_group_->move();
-        RCLCPP_INFO(this->get_logger(), "Moving!");
         auto result = std::make_shared<Reach::Result>();
-        RCLCPP_INFO(this->get_logger(), "Moving 2 !");
-
 
         if (moveit_result == moveit::core::MoveItErrorCode::SUCCESS) {
             RCLCPP_INFO(this->get_logger(), "Motion succeeded");
-            result->actual_position = goal->goal_position;
             result->status = "Goal reached";
             goal_handle->succeed(result);
         } else {
             RCLCPP_ERROR(this->get_logger(), "Motion failed");
-            result->actual_position = 0.0; // Indicate failure
             result->status = "Motion failed";
             goal_handle->abort(result);
         }
         
-        // auto feedback = std::make_shared<Reach::Feedback>();
-        // auto result = std::make_shared<Reach::Result>();
-        // feedback->success = true;
-        // goal_handle->publish_feedback(feedback);
-        // RCLCPP_INFO(this->get_logger(), "Feedback published");
-
-        // result->actual_position = goal_handle->get_goal()->goal_position;
-        // result->status = "Goal reached";
-        // goal_handle->succeed(result);
-        // RCLCPP_INFO(this->get_logger(), "Goal succeeded");
     }
 };
 
